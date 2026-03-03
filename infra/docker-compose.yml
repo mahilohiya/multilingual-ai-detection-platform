@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  detection-engine:
+    build: ../services/detection-engine
+    container_name: detection-engine
+    ports:
+      - "8000:8000"
+
+  trainer:
+    build: ../services/trainer
+    container_name: trainer
+    ports:
+      - "8001:8001"
+    depends_on:
+      - detection-engine
+
+  eval-service:
+    build: ../services/eval-service
+    container_name: eval-service
+    ports:
+      - "8002:8002"
+    depends_on:
+      - detection-engine
+

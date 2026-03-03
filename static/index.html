@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Text Detector | Multilingual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --muted: #71717a;
+      --accent: #a78bfa;
+      --accent-dim: #7c3aed;
+      --human: #34d399;
+      --ai: #f87171;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 0.95rem;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    textarea::placeholder {
+      color: var(--muted);
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.05s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    .status {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .result {
+      margin-top: 1.5rem;
+    }
+
+    .result-heading {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .result-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .result-badge.human {
+      background: rgba(52, 211, 153, 0.2);
+      color: var(--human);
+    }
+
+    .result-badge.ai {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--ai);
+    }
+
+    .prob-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      max-width: 200px;
+    }
+
+    .prob-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .prob-fill.ai {
+      background: var(--ai);
+    }
+
+    .prob-fill.human {
+      background: var(--human);
+    }
+
+    .error-msg {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--ai);
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .lang-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      background: var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+    }
+
+    .feature-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .feature-table th,
+    .feature-table td {
+      padding: 0.4rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .feature-label {
+      font-weight: 500;
+    }
+
+    .feature-score {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .feature-why {
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Text Detector</h1>
+      <p class="subtitle">Detect AI-generated vs human-written text in English, Hindi, and Hinglish.</p>
+    </header>
+
+    <div class="card">
+      <label for="input">Paste or type text to analyze</label>
+      <textarea
+        id="input"
+        placeholder="e.g. This is a sample paragraph. Or: यह एक नमूना पाठ है। Or: Yeh ek Hinglish sample hai."
+        autofocus
+      ></textarea>
+      <div class="actions">
+        <button type="button" class="btn-primary" id="analyze">Analyze</button>
+        <button type="button" class="btn-secondary" id="clear">Clear</button>
+        <span class="status" id="status"></span>
+      </div>
+      <div id="error" class="error-msg hidden"></div>
+      <div id="result" class="result hidden">
+        <div class="result-heading">Result</div>
+        <div class="result-row">
+          <span>Prediction:</span>
+          <span class="result-badge" id="badge">—</span>
+          <span class="lang-tag" id="lang">—</span>
+        </div>
+        <div class="result-row">
+          <span>AI probability:</span>
+          <span id="prob">—</span>
+        </div>
+        <div class="prob-bar">
+          <div class="prob-fill" id="probFill"></div>
+        </div>
+        <div class="result-heading" style="margin-top: 1.25rem;">Confidence breakdown</div>
+        <table class="feature-table" id="featureTable">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Score</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feature-label">Burstiness</td>
+              <td class="feature-score" id="feat-burstiness-score">—</td>
+              <td class="feature-why" id="feat-burstiness-why">—</td>
+            </tr>
+            <tr>
+              <td class="feature-label">Entropy</td>
+              <td class="feature-score" id="feat-entropy-score">—</td>
+              <td class="feature-why" id="feat-entropy-why">—</td>
+            </tr>
+            <tr>
+              <td class="feature-label">Syntax depth</td>
+              <td class="feature-score" id="feat-syntax-score">—</td>
+              <td class="feature-why" id="feat-syntax-why">—</td>
+            </tr>
+            <tr>
+              <td class="feature-label">Semantic drift</td>
+              <td class="feature-score" id="feat-drift-score">—</td>
+              <td class="feature-why" id="feat-drift-why">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer>
+      <p>Multilingual & paraphrase-aware detector. Supports English, Hindi (Devanagari), and Hinglish. Train your own model with <code>multilingual_ai_detector.py</code>; serve this UI with <code>uvicorn server:app</code>.</p>
+      <p><a href="/docs">API docs</a> · <a href="/health">Health</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const input = document.getElementById('input');
+    const analyzeBtn = document.getElementById('analyze');
+    const clearBtn = document.getElementById('clear');
+    const statusEl = document.getElementById('status');
+    const errorEl = document.getElementById('error');
+    const resultEl = document.getElementById('result');
+    const badgeEl = document.getElementById('badge');
+    const langEl = document.getElementById('lang');
+    const probEl = document.getElementById('prob');
+    const probFillEl = document.getElementById('probFill');
+    const featBurstScore = document.getElementById('feat-burstiness-score');
+    const featBurstWhy = document.getElementById('feat-burstiness-why');
+    const featEntropyScore = document.getElementById('feat-entropy-score');
+    const featEntropyWhy = document.getElementById('feat-entropy-why');
+    const featSyntaxScore = document.getElementById('feat-syntax-score');
+    const featSyntaxWhy = document.getElementById('feat-syntax-why');
+    const featDriftScore = document.getElementById('feat-drift-score');
+    const featDriftWhy = document.getElementById('feat-drift-why');
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.classList.remove('hidden');
+      resultEl.classList.add('hidden');
+    }
+
+    function hideError() {
+      errorEl.classList.add('hidden');
+    }
+
+    function showResult(data) {
+      hideError();
+      resultEl.classList.remove('hidden');
+      const isAi = data.pred_label === 1;
+      badgeEl.textContent = isAi ? 'AI-generated' : 'Human-written';
+      badgeEl.className = 'result-badge ' + (isAi ? 'ai' : 'human');
+      langEl.textContent = data.pred_lang || '—';
+      const p = (data.prob_ai * 100).toFixed(1);
+      probEl.textContent = p + '%';
+      probFillEl.style.width = p + '%';
+      probFillEl.className = 'prob-fill ' + (isAi ? 'ai' : 'human');
+      if (data.features) {
+        const f = data.features;
+        const safe = (obj, key) => obj && obj[key] ? obj[key] : null;
+        const formatScore = (s) => (s === null || s === undefined ? '—' : (Number(s).toFixed(3)));
+        featBurstScore.textContent = formatScore(safe(f.burstiness, 'score'));
+        featBurstWhy.textContent = safe(f.burstiness, 'explanation') || '—';
+        featEntropyScore.textContent = formatScore(safe(f.entropy, 'score'));
+        featEntropyWhy.textContent = safe(f.entropy, 'explanation') || '—';
+        featSyntaxScore.textContent = formatScore(safe(f.syntax_depth, 'score'));
+        featSyntaxWhy.textContent = safe(f.syntax_depth, 'explanation') || '—';
+        featDriftScore.textContent = formatScore(safe(f.semantic_drift, 'score'));
+        featDriftWhy.textContent = safe(f.semantic_drift, 'explanation') || '—';
+      }
+    }
+
+    async function analyze() {
+      const text = (input.value || '').trim();
+      if (!text) {
+        showError('Please enter some text.');
+        return;
+      }
+      analyzeBtn.disabled = true;
+      setStatus('Analyzing…');
+      hideError();
+      try {
+        const res = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showError(data.error || data.detail || 'Request failed.');
+          return;
+        }
+        if (data.error) {
+          showError(data.error);
+          return;
+        }
+        showResult(data);
+        setStatus('Done.');
+      } catch (e) {
+        showError('Network error: ' + e.message);
+        setStatus('');
+      } finally {
+        analyzeBtn.disabled = false;
+      }
+    }
+
+    function clearAll() {
+      input.value = '';
+      statusEl.textContent = '';
+      hideError();
+      resultEl.classList.add('hidden');
+      input.focus();
+    }
+
+    analyzeBtn.addEventListener('click', analyze);
+    clearBtn.addEventListener('click', clearAll);
+    input.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') analyze();
+    });
+  </script>
+</body>
+</html>
