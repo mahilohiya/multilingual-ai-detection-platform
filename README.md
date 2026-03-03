@@ -95,10 +95,35 @@ uvicorn server:app --reload --port 8002
 
 - `services/` – all three microservices.
 - `infra/docker-compose.yml` – one-command orchestration for Services A, B, and C.
+- `frontend/` – React + TypeScript + Tailwind dashboard.
 - `README.md` (this file) – main documentation and entrypoint.
 
 You can extend this platform with:
 
-- A React/TypeScript dashboard in `frontend/` consuming the three APIs.
 - Model versioning and real training in the Trainer service.
 - Additional adversarial attacks (noise, style-shift, multi-step translation) in the Eval service.
+
+---
+
+## Frontend dashboard (React)
+
+The `frontend/` app provides:
+
+- A **hero/overview** page with animated stats.
+- An **Analyze** page with explainability cards (glassmorphism, tilt).
+- A **Compare** page for side-by-side analysis of two texts.
+- A **Modes** page with an “Academic mode” toggle.
+
+### Run the frontend
+
+```bash
+cd frontend
+npm install           # or pnpm install / yarn
+npm run dev           # default: http://localhost:5173
+```
+
+During development, the Vite dev server proxies to the three backends:
+
+- `/api/detect/*` → Detection Engine (8000)
+- `/api/train/*` → Trainer (8001)
+- `/api/eval/*` → Eval Service (8002)

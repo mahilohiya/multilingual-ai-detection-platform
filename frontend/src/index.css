@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-bg text-slate-100 antialiased;
+}
+
+.glass {
+  @apply bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl;
+}
+
+.card-tilt {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.card-tilt:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
