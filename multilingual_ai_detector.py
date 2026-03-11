@@ -416,7 +416,7 @@ def train_main(args: argparse.Namespace) -> None:
         )
 
         if metrics["f1"] > best_f1:
-            best_f1 = metrics["f1"]
+            best_f1 = metrics["f1"]npm run dev
             save_path = os.path.join(cfg.save_dir, "best")
             save_model(model, tokenizer, cfg, save_path)
             with open(os.path.join(save_path, "config.json"), "w", encoding="utf-8") as f:
